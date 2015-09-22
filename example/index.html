@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IndexDB</title>
+</head>
+<body>
+    <input id="input"></input>
+    <button id="save">Create</button>
+
+    <hr>
+
+    <input id="inputReadId"></input>
+    <button id="read">Read</button>
+
+    <hr>
+
+    <input id="inputUpdateId" style="width: 40px;"></input>
+    <input id="inputUpdate"></input>
+    <button id="update">Update</button>
+
+    <hr>
+
+    <input id="inputDeleteId"></input>
+    <button id="delete">Delete</button>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script type="text/javascript" src="../indexed-db-manager.js"></script>
+    <script type="text/javascript">
+        (function($, window, document, undefined) {
+            'use strict';
+
+            IndexDBManager.init('mydb', 1);
+
+            $("#save").click(function(e) {
+                var user = { name: $('#input').val() };
+                IndexDBManager.save(user, 'users', function() {
+                    console.info('User saved');
+                    $('#input').val('');
+                }, function() {
+                    console.warn('User not saved');
+                });
+            });
+
+            $("#read").click(function(e) {
+                var userFilter,
+                    userToSelect = $('#inputReadId').val();
+
+                if (userToSelect) {
+                    userFilter = function(user) { return user.id == userToSelect; };
+                }
+
+                IndexDBManager.read(userFilter, 'users', function(users) {
+                    console.info(users);
+                    $('#inputDeleteId').val('');
+                }, function() {
+                    console.warn('Unable to read users');
+                });
+            });
+
+            $("#update").click(function(e) {
+                var userToUpdate = $('#inputUpdateId').val(),
+                    newName = $('#inputUpdate').val();
+
+                if (userToUpdate) {
+                    IndexDBManager.update(userToUpdate, { name: newName }, 'users', function() {
+                        console.info('User updated');
+                        $('#inputUpdateId').val('');
+                        $('#inputUpdate').val('');
+                    }, function() {
+                        console.warn('User not updated');
+                    });
+                }
+            });
+
+            $("#delete").click(function(e) {
+                var userToDelete = parseInt($('#inputDeleteId').val());
+                IndexDBManager.delete(userToDelete, 'users', function() {
+                    console.info('User deleted');
+                    $('#inputDeleteId').val('');
+                }, function() {
+                    console.warn('User not deleted');
+                });
+            });
+
+        })(jQuery, window, document);
+    </script>
+</body>
+</html>
